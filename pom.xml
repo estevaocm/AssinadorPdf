@@ -7,6 +7,14 @@
 	<artifactId>assinadorpdf</artifactId>
 	<version>1.0.0</version>
 	
+	<name>AssinadorPdf</name>
+	<description>PDF document signer for ICP-Brasil certificates based on Demoiselle Signer, BouncyCastle and PDFBox. </description>
+	<url>https://github.com/estevaocm/AssinadorPdf</url>
+	<organization>
+		<name>SERPRO</name>
+		<url>https://www.serpro.gov.br</url>
+	</organization>
+	
 	<properties>
 		<signer.version>3.2.1</signer.version>
 		<bouncycastle.version>1.59</bouncycastle.version>
@@ -118,16 +126,19 @@
 	</build>
 	
 	<repositories>
-		<repository>
-			<id>demoiselle</id>
-			<name>Demoiselle SourceForge Repository</name>
-			<url>http://demoiselle.sourceforge.net/repository/release</url>
-		</repository>
 		
 		<repository>
 	      <id>yoava</id>
 	      <name>AOL yoava</name>
-	      <url>http://yoava.artifactoryonline.com/yoava/repo</url>
+	      <url>http://yoava.artifactoryonline.com/yoava/repo</url><!-- Offline! -->
 	   </repository>
+	   
+		<repository>
+	      <id>mulesoft</id>
+	      <name>Mulesoft Nexus</name>
+	      <url>https://repository.mulesoft.org/nexus/content/repositories/public</url>
+	   </repository>
+	   
 	</repositories>
+	
 </project>
