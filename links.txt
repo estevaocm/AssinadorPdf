@@ -1,0 +1,7 @@
+https://www.gnostice.com/nl_article.asp?id=258&t=How_To_Digitally_Sign_A_PDF_Document_In_Java
+
+http://help.adobe.com/en_US/livecycle/9.0/programLC/help/index.htm?content=000908.html#1548321
+
+http://www.aspose.com/docs/display/pdfjava/Add+Digital+Signature+to+PDF+file
+
+http://stackoverflow.com/questions/9666266/how-to-digitally-sign-a-pdf-using-itext
