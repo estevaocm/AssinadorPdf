@@ -6,4 +6,4 @@ Baseado em PDFBox, Demoiselle Signer e Bouncy Castle.
 
 Exemplo de uso em src/test/java/br.gov.serpro.pdf.assinador.AssinadorPdfTest
 
-Desenvolvido por Estêvão Monteiro (SERPRO/SUPDE/DERCE) com colaboração de Renê Campanário, Emerson Saito (SERPRO/SUPSD/SDSIA) e Fábio Cordeiro (SERPRO/SUPDE/DERCE). 2018.
+Desenvolvido por Estêvão Monteiro (SUPDE/DERCE) com colaboração de Renê Campanário, Emerson Saito (SUPSD/SDSIA) e Fábio Cordeiro (SUPDE/DERCE). 2018.

@@ -30,7 +30,7 @@
  * <http://www.gnu.org/licenses/> ou escreva para a Fundação do Software Livre (FSF) 
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA.
  */
-package br.gov.serpro.pdf.assinador;
+package br.gov.serpro.assinador.pdf;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -163,6 +163,9 @@ public class AssinadorPdf {
 
 	/**
 	 * Embute a assinatura informada (prévia ou externamente gerada) no documento PDF.
+	 * É importante conferir previamente o hash da assinatura com o deste objeto,
+	 * atentando para o algoritmo (SHA-256, SHA-512 etc.). Se estiverem iguais,
+	 * o PDF resultante ficará com a assinatura válida. 
 	 * @param original
 	 * @param assinado
 	 * @param assinatura
@@ -171,33 +174,37 @@ public class AssinadorPdf {
 	 */
 	public void sign(byte[] assinatura) throws IOException, GeneralSecurityException {
 		if(assinatura == null){
-			throw new NullPointerException("assinatura");
+			throw new NullPointerException("assinatura nula");
 		}
 		verificarEstado();
 		this.assinatura = assinatura;
-		//Obtém os dados a assinar:
-		byte[] content = getConteudo();
-		//TODO conferir o hash do parâmetro 'assinatura' com o hash de 'content' 
-
+		
 		//Insere a assinatura CMS no documento:
 		this.externalSigningSupport.setSignature(assinatura);
 		close();
 	}
 
-	public byte[] hash() throws IOException, GeneralSecurityException {
+	public byte[] hash(String algoritmo) throws IOException, GeneralSecurityException {
 		if(this.hash != null){
-			return this.hash;
+			L.warn("Substituindo hash anterior.");
 		}
 		verificarEstado();
 		byte[] content = getConteudo();
-		String alg = "SHA-256";
+		this.hash = hash(content, algoritmo);
+		return this.hash;
+	}
+
+	public static byte[] hash(byte[] content, String algoritmo) throws IOException, GeneralSecurityException {
+		if(algoritmo == null || algoritmo.isEmpty()) {
+			algoritmo = "SHA-256";
+		}
 		//alg = "SHA-512";
-		MessageDigest md = MessageDigest.getInstance(alg);
+		MessageDigest md = MessageDigest.getInstance(algoritmo);
 		md.update(content);
 		//salvarTesteTxt(content);
-		this.hash = md.digest();
-		L.info(new String(Base64.getEncoder().encodeToString(this.hash)));
-		return this.hash;
+		byte[] hash = md.digest();
+		L.info(new String(Base64.getEncoder().encodeToString(hash)));
+		return hash;
 	}
 
 	public void close() throws IOException{
@@ -225,6 +232,7 @@ public class AssinadorPdf {
 	}
 
 	protected void load() throws IOException, GeneralSecurityException{
+		//TODO converter para PDF/A
 		if(this.doc != null){
 			this.doc.close();
 		}
@@ -356,7 +364,23 @@ public class AssinadorPdf {
 		}
 	}
 	
-	@Deprecated
+	/**
+	 * Recupera o PDDocument que está sendo trabalhado. Cuidado ao manipular este objeto para não deixar o
+	 * AssinadorPdf em estado inválido. Se possível, usar apenas para consultas.
+	 * @return
+	 * @throws GeneralSecurityException 
+	 * @throws IOException 
+	 */
+	public PDDocument getPDDocument() throws IOException, GeneralSecurityException {
+		if(this.doc == null) {
+			load();
+		}
+		return this.doc;
+	}
+
+	/*
+	 * Método auxiliar para testes
+	 */
 	private void salvarTesteTxt(byte[] content) throws IOException{
 		try (FileOutputStream out = new FileOutputStream(new File("teste.txt"));){
 			out.write(content);
@@ -375,11 +399,11 @@ public class AssinadorPdf {
 	 * @throws IOException
 	 * @throws GeneralSecurityException
 	 */
-	public void prepararEstampa(InputStream imagem, float x, float y, float zoomPercent)
+	public void prepararEstampa(InputStream imagem, int pagina, float x, float y, float zoomPercent)
 			throws IOException, GeneralSecurityException{
 		load();
 		//Tem que ser chamado após AssinadorPdf() mas antes de hash()
-		this.estampa = new Estampa(this.doc, imagem, x, y, zoomPercent, this.assinaturaPdf);
+		this.estampa = new Estampa(this.doc, imagem, pagina, x, y, zoomPercent, this.assinaturaPdf);
 		prepararAssinatura();
 	}
 	
@@ -390,15 +414,12 @@ public class AssinadorPdf {
 		protected PDVisibleSigProperties props;
 		protected SignatureOptions options;		
 		
-		protected Estampa(PDDocument doc, InputStream imagem, float x, float y, float zoomPercent, 
+		protected Estampa(PDDocument doc, InputStream imagem, int pagina, float x, float y, float zoomPercent, 
 				PDSignature descAssinatura) throws IOException{
 			
 			this.doc = doc;
 			
-			// Recupera a última página do PDF
-			int lastPage = doc.getNumberOfPages();//TODO voltar isso a parâmetro
-			
-			this.design = new PDVisibleSignDesigner(this.doc, imagem, lastPage);
+			this.design = new PDVisibleSignDesigner(this.doc, imagem, pagina);
 			this.design.xAxis(x)
 				.yAxis(y)
 				.zoom(zoomPercent)
@@ -411,7 +432,7 @@ public class AssinadorPdf {
 					.signerLocation(descAssinatura.getLocation())
 					.signatureReason(descAssinatura.getReason())
 					.preferredSize(0) //default
-					.page(lastPage).visualSignEnabled(true) //se não fosse, não estaria criando Estampa
+					.page(pagina).visualSignEnabled(true) //se não fosse, não estaria criando Estampa
 					.setPdVisibleSignature(this.design);
 			
 		}

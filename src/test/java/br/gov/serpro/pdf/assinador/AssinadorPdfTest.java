@@ -34,10 +34,15 @@ package br.gov.serpro.pdf.assinador;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Calendar;
 
+import org.demoiselle.signer.policy.impl.cades.SignerAlgorithmEnum;
+
+import br.gov.serpro.assinador.pdf.AssinadorPdf;
+import br.gov.serpro.assinador.pdf.AssinadorPdfToken;
 import br.gov.serpro.pdf.assinador.util.EstampaUtil;
 
 /**
@@ -58,51 +63,47 @@ public class AssinadorPdfTest {
 			data.setTime(FORMATO_DATA_ASSINATURA.parse("19-01-2018 14:05"));
 			
 			AssinadorPdf assinadorPdf = new AssinadorPdf(in, out, data);
-			//AssinadorPdf assinadorPdf = new AssinadorPdf(FileUtils.readFileToByteArray(in), out);
-			//testarAssinaturaSincrona(assinadorPdf);
-			//testarAssinaturaAssincrona(assinadorPdf);
-			testarAssinaturaAssincrona2(assinadorPdf);
+			//assinadorPdf.sign();
+			testarAssinaturaAssincrona(assinadorPdf);
 		}
 		catch(Throwable t){
 			t.printStackTrace();
 		}
 	}
 	
-	private static void testarAssinaturaSincrona(AssinadorPdf assinadorPdf) throws Throwable{
-		assinadorPdf.sign();
-	}
-	
 	private static void testarAssinaturaAssincrona(AssinadorPdf assinadorPdf) throws Throwable{
-		File imagem = EstampaUtil.gerarEstampa(
-				"Organização",
-				"Fulano", 
-				"999.999.999-99", 
-				"COORDENADOR DE LICITACOES DE SERVIÇOS ADM. E AQUISICOES DE BENS E CONTRATOS", 
-				"08/01/2018 17:15", "http://assinador.serpro.gov.br/validacao");
+		File imagem = recuperarImagem();
+		imagem = gerarImagem();
 		
-		assinadorPdf.prepararEstampa(new FileInputStream(imagem), 10, 700, -40);
-		byte[] hash = assinadorPdf.hash();//backend calcula o hash
-		//byte[] preparado = assinadorPdf.getConteudo();
-		
-		byte[] assinatura = new AssinadorPdfToken().signHash(hash);//frontend assina o hash
-		if(assinatura == null) return;
-		assinadorPdf.sign(assinatura);//backend assina o PDF com assinatura recebida do frontend
-		
-		assinadorPdf.close();
-	}	
-
-	private static void testarAssinaturaAssincrona2(AssinadorPdf assinadorPdf) throws Throwable{
-		File imagem = new File("~/estampa4450810727878248742.png");
-		
-		assinadorPdf.prepararEstampa(new FileInputStream(imagem), 30, 690, -50);
-		byte[] hash = assinadorPdf.hash();//backend calcula o hash
+		int pagina = assinadorPdf.getPDDocument().getNumberOfPages();
+		assinadorPdf.prepararEstampa(new FileInputStream(imagem), pagina, 30, 690, -50);
+		byte[] hash = assinadorPdf.hash("SHA-512");//backend calcula o hash
 		//byte[] preparado = assinadorPdf.getConteudo();
 		
 		byte[] assinatura = new AssinadorPdfToken().signHash(hash);//frontend assina o hash
 		System.out.println(new String(Base64.getEncoder().encodeToString(assinatura)));
 		if(assinatura == null) return;
+		
+		//new AssinadorPdfToken().validarHash(hash, assinatura, "2.16.840.1.101.3.4.2.3");
+		//new AssinadorPdfToken().validarHash(hash, assinatura, "2.16.840.1.101.3.4.2.1");
+		
+		new AssinadorPdfToken().validarPorHash(hash, assinatura, SignerAlgorithmEnum.SHA512withRSA);
+		
 		assinadorPdf.sign(assinatura);//backend assina o PDF com assinatura recebida do frontend
 		
 		assinadorPdf.close();
 	}	
+
+	private static File gerarImagem() throws IOException {
+		return EstampaUtil.gerarEstampa(
+				"Organização",
+				"Fulano Cicrano Beltrano Fulano Cicrano", 
+				"012.345.678-90", 
+				"COORDENADOR DE LICITACOES DE SERVIÇOS ADM. E AQUISICOES DE BENS E CONTRATOS", 
+				"08/01/2018 17:15", "http://assinador.org.br/validacao");
+	}
+	
+	private static File recuperarImagem() {
+		return new File("~/dnit/estampa4450810727878248742.png");
+	}
 }

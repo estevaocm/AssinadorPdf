@@ -1,4 +1,4 @@
-package br.gov.serpro.pdf.assinador;
+package br.gov.serpro.assinador.pdf;
 
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
