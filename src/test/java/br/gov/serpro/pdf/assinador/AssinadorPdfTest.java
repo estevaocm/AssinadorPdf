@@ -81,7 +81,7 @@ public class AssinadorPdfTest {
 		//byte[] preparado = assinadorPdf.getConteudo();
 		
 		byte[] assinatura = new AssinadorPdfToken().signHash(hash);//frontend assina o hash
-		System.out.println(new String(Base64.getEncoder().encodeToString(assinatura)));
+		System.out.println(new String(Base64.getEncoder().encode(assinatura), StandardCharsets.UTF_8));
 		if(assinatura == null) return;
 		
 		//new AssinadorPdfToken().validarHash(hash, assinatura, "2.16.840.1.101.3.4.2.3");
@@ -104,6 +104,6 @@ public class AssinadorPdfTest {
 	}
 	
 	private static File recuperarImagem() {
-		return new File("~/dnit/estampa4450810727878248742.png");
+		return new File("~/assinador/estampa4450810727878248742.png");
 	}
 }

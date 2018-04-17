@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.util.Base64;
@@ -57,8 +58,6 @@ import org.slf4j.LoggerFactory;
  * @since 23/10/17
  */
 public class AssinadorPdf {
-	//TODO validar o PDF assinado
-	//TODO converter para PDF/A
 	
 	private static final Logger L = LoggerFactory.getLogger(AssinadorPdf.class);
 	protected static final Long SEED = 182959L;
@@ -203,7 +202,7 @@ public class AssinadorPdf {
 		md.update(content);
 		//salvarTesteTxt(content);
 		byte[] hash = md.digest();
-		L.info(new String(Base64.getEncoder().encodeToString(hash)));
+		L.info(new String(Base64.getEncoder().encode(hash), StandardCharsets.UTF_8));
 		return hash;
 	}
 
@@ -291,7 +290,7 @@ public class AssinadorPdf {
 	
 	protected void prepararAssinatura() throws IOException, GeneralSecurityException{
 		//Define a propriedade "ID" no "trailer" do PDF para garantir que o hash não mude em execuções subsequentes:
-		this.doc.setDocumentId(this.SEED);
+		this.doc.setDocumentId(SEED);
 		//Prepara objeto para receber a assinatura no documento:
 		if(this.estampa == null){
 			this.doc.addSignature(this.assinaturaPdf);
