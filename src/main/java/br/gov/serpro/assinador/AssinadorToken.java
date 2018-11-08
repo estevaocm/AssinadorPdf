@@ -257,7 +257,7 @@ public class AssinadorToken{
 		L.info("A assinatura está válida.");
 		for(SignatureInformations si : sigData){
 			L.debug(si.getSignDateGMT());
-			L.debug(si.getSignersBasicCertificates().toString());
+			L.debug(si.getSignerBasicCertificate().toString());
 			L.debug(si.getChain().toString());
 		}
 	}		
@@ -270,7 +270,7 @@ public class AssinadorToken{
 		L.info("A assinatura está válida.");
 		for(SignatureInformations si : sigData){
 			L.debug(si.getSignDateGMT());
-			L.debug(si.getSignersBasicCertificates().toString());
+			L.debug(si.getSignerBasicCertificate().toString());
 			L.debug(si.getChain().toString());
 		}
 	}		
