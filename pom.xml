@@ -130,18 +130,6 @@
 			</plugin>
 		</plugins>
 	</build>
-	<distributionManagement>
-		 <repository>
-			  <id>nexus</id>
-			  <name>releases</name>
-			  <url>http://nexus.aic.serpro/content/repositories/releases</url>
-		 </repository>
-		 <snapshotRepository>
-			  <id>nexus-snapshot</id>
-			  <name>snapshots</name>
-			  <url>http://nexus.aic.serpro/content/repositories/snapshots</url>
-		 </snapshotRepository>
-	</distributionManagement>
 	
 	<repositories>
 		<repository>
@@ -155,5 +143,11 @@
 	      <name>AOL yoava</name>
 	      <url>http://yoava.artifactoryonline.com/yoava/repo</url>
 	   </repository>
+		
+ 		<repository>
+	      <id>mulesoft</id>
+	      <name>Mulesoft Nexus</name>
+	      <url>https://repository.mulesoft.org/nexus/content/repositories/public</url>
+	   </repository>		
 	</repositories>
 </project>
