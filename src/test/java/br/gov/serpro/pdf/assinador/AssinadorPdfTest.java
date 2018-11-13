@@ -30,7 +30,7 @@
  * <http://www.gnu.org/licenses/> ou escreva para a Fundação do Software Livre (FSF) 
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA.
  */
-package br.gov.serpro.assinador.pdf;
+package br.gov.serpro.pdf.assinador;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,7 +43,7 @@ import org.demoiselle.signer.policy.impl.cades.SignerAlgorithmEnum;
 
 import br.gov.serpro.assinador.pdf.AssinadorPdf;
 import br.gov.serpro.assinador.pdf.AssinadorPdfToken;
-import br.gov.serpro.assinador.pdf.util.EstampaUtil;
+import br.gov.serpro.pdf.assinador.util.EstampaUtil;
 
 /**
  * 
@@ -56,14 +56,8 @@ public class AssinadorPdfTest {
 	
 	public static void main(String[] args) throws Exception{
 		try{
-			//verificarPDFA("/home/01608390500/dnit/ofpg-stamp.pdf");
-			
 			File in = new File("./src/test/resources/ofpg.pdf");
 			File out = new File("./src/test/resources/ofpg-signed-stamp.pdf");
-			out = new File("/home/01608390500/dnit/ofpg-stamp.pdf");
-			out = new File("/home/01608390500/dnit/ofpg-stamp2.pdf");
-			out = new File("/home/01608390500/dnit/ofpg-stamp3.pdf");
-			//in = new File("/home/01608390500/dnit/doc_assinado_173_19-01-2018_original.pdf");
 			
 			Calendar data = Calendar.getInstance();
 			data.setTime(FORMATO_DATA_ASSINATURA.parse("08-11-2018 19:10"));
@@ -99,26 +93,19 @@ public class AssinadorPdfTest {
 		assinadorPdf.sign(assinatura);//backend assina o PDF com assinatura recebida do frontend
 		
 		assinadorPdf.close();
-		/*
-		File in = new File("/home/01608390500/dnit/ofpg-stamp.pdf");
-		File out = new File("/home/01608390500/dnit/ofpg-stamp-signed.pdf");
-		FileUtils.writeByteArrayToFile(in, preparado);
-		assinadorPdf = new AssinadorPdf(in, out);
-		assinadorPdf.sign();//backend assina o PDF com assinatura recebida do frontend
-		*/
 	}	
 
 	private static File gerarImagem() throws IOException {
 		return EstampaUtil.gerarEstampa(
-				"Departamento Nacional de Infraestrutura de Transportes",
-				"AMANDA DANDARA REGINA JOSHUA DE SOUZA", 
+				"Organização",
+				"Fulano Cicrano Beltrano Fulano Cicrano", 
 				"012.345.678-90", 
 				"COORDENADOR DE LICITACOES DE SERVIÇOS ADM. E AQUISICOES DE BENS E CONTRATOS", 
-				"08/01/2018 17:15", "http://assinador.dnit.gov.br/validacao");
+				"08/01/2018 17:15", "http://assinador.org.br/validacao");
 	}
 	
 	private static File recuperarImagem() {
-		return new File("/home/01608390500/dnit/estampa4450810727878248742.png");
+		return new File("~/assinador/estampa4450810727878248742.png");
 	}
 	
 }
