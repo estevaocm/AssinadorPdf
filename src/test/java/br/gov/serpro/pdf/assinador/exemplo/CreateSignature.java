@@ -19,7 +19,7 @@ import org.apache.pdfbox.pdmodel.interactive.digitalsignature.ExternalSigningSup
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureOptions;
 
-import br.gov.serpro.pdf.assinador.SigUtils;
+import br.gov.serpro.assinador.pdf.SigUtils;
 
 /**
  * An example for singing a PDF with bouncy castle.
