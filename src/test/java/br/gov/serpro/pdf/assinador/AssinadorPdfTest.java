@@ -30,20 +30,20 @@
  * <http://www.gnu.org/licenses/> ou escreva para a Fundação do Software Livre (FSF) 
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA.
  */
-package br.gov.serpro.pdf.assinador;
+package br.gov.serpro.assinador.pdf;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
 import java.util.Calendar;
 
+import org.bouncycastle.util.encoders.Base64;
 import org.demoiselle.signer.policy.impl.cades.SignerAlgorithmEnum;
 
 import br.gov.serpro.assinador.pdf.AssinadorPdf;
 import br.gov.serpro.assinador.pdf.AssinadorPdfToken;
-import br.gov.serpro.pdf.assinador.util.EstampaUtil;
+import br.gov.serpro.assinador.pdf.util.EstampaUtil;
 
 /**
  * 
@@ -56,15 +56,22 @@ public class AssinadorPdfTest {
 	
 	public static void main(String[] args) throws Exception{
 		try{
+			//verificarPDFA("/home/01608390500/dnit/ofpg-stamp.pdf");
+			
 			File in = new File("./src/test/resources/ofpg.pdf");
 			File out = new File("./src/test/resources/ofpg-signed-stamp.pdf");
+			out = new File("/home/01608390500/dnit/ofpg-stamp.pdf");
+			out = new File("/home/01608390500/dnit/ofpg-stamp2.pdf");
+			out = new File("/home/01608390500/dnit/ofpg-stamp3.pdf");
+			//in = new File("/home/01608390500/dnit/doc_assinado_173_19-01-2018_original.pdf");
 			
 			Calendar data = Calendar.getInstance();
-			data.setTime(FORMATO_DATA_ASSINATURA.parse("19-01-2018 14:05"));
+			data.setTime(FORMATO_DATA_ASSINATURA.parse("08-11-2018 19:10"));
 			
 			AssinadorPdf assinadorPdf = new AssinadorPdf(in, out, data);
 			//assinadorPdf.sign();
 			testarAssinaturaAssincrona(assinadorPdf);
+			
 		}
 		catch(Throwable t){
 			t.printStackTrace();
@@ -81,7 +88,7 @@ public class AssinadorPdfTest {
 		//byte[] preparado = assinadorPdf.getConteudo();
 		
 		byte[] assinatura = new AssinadorPdfToken().signHash(hash);//frontend assina o hash
-		System.out.println(new String(Base64.getEncoder().encode(assinatura), StandardCharsets.UTF_8));
+		System.out.println(Base64.toBase64String(assinatura));
 		if(assinatura == null) return;
 		
 		//new AssinadorPdfToken().validarHash(hash, assinatura, "2.16.840.1.101.3.4.2.3");
@@ -92,18 +99,26 @@ public class AssinadorPdfTest {
 		assinadorPdf.sign(assinatura);//backend assina o PDF com assinatura recebida do frontend
 		
 		assinadorPdf.close();
+		/*
+		File in = new File("/home/01608390500/dnit/ofpg-stamp.pdf");
+		File out = new File("/home/01608390500/dnit/ofpg-stamp-signed.pdf");
+		FileUtils.writeByteArrayToFile(in, preparado);
+		assinadorPdf = new AssinadorPdf(in, out);
+		assinadorPdf.sign();//backend assina o PDF com assinatura recebida do frontend
+		*/
 	}	
 
 	private static File gerarImagem() throws IOException {
 		return EstampaUtil.gerarEstampa(
-				"Organização",
-				"Fulano Cicrano Beltrano Fulano Cicrano", 
+				"Departamento Nacional de Infraestrutura de Transportes",
+				"AMANDA DANDARA REGINA JOSHUA DE SOUZA", 
 				"012.345.678-90", 
 				"COORDENADOR DE LICITACOES DE SERVIÇOS ADM. E AQUISICOES DE BENS E CONTRATOS", 
-				"08/01/2018 17:15", "http://assinador.org.br/validacao");
+				"08/01/2018 17:15", "http://assinador.dnit.gov.br/validacao");
 	}
 	
 	private static File recuperarImagem() {
-		return new File("~/assinador/estampa4450810727878248742.png");
+		return new File("/home/01608390500/dnit/estampa4450810727878248742.png");
 	}
+	
 }
