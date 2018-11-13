@@ -25,7 +25,7 @@ import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDSignatureField;
 import org.apache.pdfbox.util.Hex;
 
-import br.gov.serpro.pdf.assinador.SigUtils;
+import br.gov.serpro.assinador.pdf.SigUtils;
 
 /**
  * This is an example for visual signing a pdf.
