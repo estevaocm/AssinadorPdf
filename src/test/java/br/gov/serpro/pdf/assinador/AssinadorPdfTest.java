@@ -65,6 +65,10 @@ public class AssinadorPdfTest {
             AssinadorPdf assinadorPdf = new AssinadorPdf(in, out, data);
             // assinadorPdf.sign();
             testarAssinaturaAssincrona(assinadorPdf);
+            /*
+            org.demoiselle.signer.policy.impl.cades.SignerException: O documento foi alterado após a assinatura ou esta não pertence a este documento.
+            at br.gov.serpro.assinador.AssinadorToken.validarPorHash(AssinadorToken.java:300)
+             */
 
         } catch (Throwable t) {
             t.printStackTrace();
@@ -77,7 +81,8 @@ public class AssinadorPdfTest {
 
         int pagina = assinadorPdf.getPDDocument().getNumberOfPages();
         assinadorPdf.prepararEstampa(new FileInputStream(imagem), pagina, 30, 690, -50);
-        byte[] hash = assinadorPdf.hash("SHA-512");// backend calcula o hash
+        // byte[] hash = assinadorPdf.hash("SHA-512");// backend calcula o hash
+        byte[] hash = assinadorPdf.hash("SHA-256");// backend calcula o hash
         // byte[] preparado = assinadorPdf.getConteudo();
 
         byte[] assinatura = new AssinadorPdfToken().signHash(hash);// frontend assina o hash
@@ -89,7 +94,8 @@ public class AssinadorPdfTest {
         // new AssinadorPdfToken().validarHash(hash, assinatura, "2.16.840.1.101.3.4.2.3");
         // new AssinadorPdfToken().validarHash(hash, assinatura, "2.16.840.1.101.3.4.2.1");
 
-        new AssinadorPdfToken().validarPorHash(hash, assinatura, SignerAlgorithmEnum.SHA512withRSA);
+        // new AssinadorPdfToken().validarPorHash(hash, assinatura, SignerAlgorithmEnum.SHA512withRSA);
+        new AssinadorPdfToken().validarPorHash(hash, assinatura, SignerAlgorithmEnum.SHA256withRSA);
 
         assinadorPdf.sign(assinatura);// backend assina o PDF com assinatura recebida do frontend
 
