@@ -26,8 +26,8 @@
  * para mais detalhes.
  *
  * Você deve ter recebido uma cópia da GNU LGPL versão 3, sob o título
- * "LICENCA.txt", junto com esse programa. Caso contrário, acesse 
- * <http://www.gnu.org/licenses/> ou escreva para a Fundação do Software Livre (FSF) 
+ * "LICENCA.txt", junto com esse programa. Caso contrário, acesse
+ * <http://www.gnu.org/licenses/> ou escreva para a Fundação do Software Livre (FSF)
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA.
  */
 package br.gov.serpro.assinador;
@@ -60,227 +60,231 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Assina um vetor de bytes com uma chave privada proveniente de token.
+ *
  * @author Estêvão Monteiro, Renê Campanário
  * @since 23/10/17
  */
-public class AssinadorToken{
+public class AssinadorToken {
 
-	private static final Logger L = LoggerFactory.getLogger(AssinadorToken.class); 
+    private static final Logger L = LoggerFactory.getLogger(AssinadorToken.class);
 
-	protected CallbackHandler callbackHandler;
-	protected PKCS7Signer signer;
-	protected X509Certificate certificate;
-	protected Certificate[] chain;
+    protected CallbackHandler callbackHandler;
+    protected PKCS7Signer signer;
+    protected X509Certificate certificate;
+    protected Certificate[] chain;
 
-	public AssinadorToken() throws IOException, GeneralSecurityException{
-		L.info("Iniciando " + getClass().getSimpleName());
-		L.info(System.getProperty("java.vendor") + " Java " + System.getProperty("java.version"));
-		//IMPORTANTE: Nunca permitir que métodos chamados no construtor sejam sobrescritos em subclasses.
-		this.signer = newSigner();
-		this.callbackHandler = getCallbackHandler();
-	}
+    public AssinadorToken() throws IOException, GeneralSecurityException {
+        L.info("Iniciando " + getClass().getSimpleName());
+        L.info(System.getProperty("java.vendor") + " Java " + System.getProperty("java.version"));
+        // IMPORTANTE: Nunca permitir que métodos chamados no construtor sejam sobrescritos em subclasses.
+        this.signer = newSigner();
+        this.callbackHandler = getCallbackHandler();
+    }
 
-	/**
-	 * Tratador do retorno do diálogo para informar o PIN.
-	 * @return
-	 * @throws IOException
-	 */
-	private CallbackHandler getCallbackHandler() throws IOException{
-		return new CallbackHandler() {
-			public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-				/*
-				Não é necessário fazer nada, o driver fornecerá janela de diálogo para pedir PIN se necessário.
-				for (Callback callback : callbacks) {
-					if (callback instanceof PasswordCallback) {
-						L.info("Solicitando PIN");
-						PasswordCallback pwd = ((PasswordCallback)callback);
-						L.info("PIN OK");
-					}
-				}
-				 */
-			}
-		};
-	}
+    /**
+     * Tratador do retorno do diálogo para informar o PIN.
+     *
+     * @return
+     * @throws IOException
+     */
+    private CallbackHandler getCallbackHandler() throws IOException {
+        return new CallbackHandler() {
 
-	/**
-	 * Constroi o assinador de token.
-	 * @return
-	 * @throws GeneralSecurityException
-	 */
-	private PKCS7Signer newSigner() throws GeneralSecurityException{
+            @Override
+            public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+                /*
+                Não é necessário fazer nada, o driver fornecerá janela de diálogo para pedir PIN se necessário.
+                for (Callback callback : callbacks) {
+                	if (callback instanceof PasswordCallback) {
+                		L.info("Solicitando PIN");
+                		PasswordCallback pwd = ((PasswordCallback)callback);
+                		L.info("PIN OK");
+                	}
+                }
+                 */
+            }
+        };
+    }
 
-		PKCS7Signer signer = PKCS7Factory.getInstance().factory();
+    /**
+     * Constroi o assinador de token.
+     *
+     * @return
+     * @throws GeneralSecurityException
+     */
+    private PKCS7Signer newSigner() throws GeneralSecurityException {
 
-		//TODO parametrizar a política?
-		Policies signaturePolicy = PolicyFactory.Policies.AD_RB_CADES_2_2;
-		L.info("Configurando política de Assinatura: " + signaturePolicy.getUrl());
+        PKCS7Signer signer = PKCS7Factory.getInstance().factory();
 
-		signer.setSignaturePolicy(signaturePolicy);
+        // TODO parametrizar a política?
+        Policies signaturePolicy = PolicyFactory.Policies.AD_RB_CADES_2_2;
+        L.info("Configurando política de Assinatura: " + signaturePolicy.getUrl());
 
-		return signer;
-	}
+        signer.setSignaturePolicy(signaturePolicy);
 
-	private SignerAlgorithmEnum getAlgoritmo() {
-		SignerAlgorithmEnum alg = SignerAlgorithmEnum.SHA512withRSA;
-		L.info("O algoritmo default é SHA512withRSA");
-		if (System.getProperty("java.version").contains("1.8") 
-				&& (this.signer.getProvider() != null &&
-				this.signer.getProvider().getName().contains("TokenOuSmartCard_30"))) {
-			L.info("Detectado token WatchData e Java 8; configurando o algoritmo para Sha256withRSA.");
-			alg = SignerAlgorithmEnum.SHA256withRSA;
-		}
-		if (Configuration.getInstance().getSO().toLowerCase().indexOf("indows") > 0) {
-			L.info("Detectado Windows; configurando o algoritmo para Sha256withRSA.");
-			alg = SignerAlgorithmEnum.SHA256withRSA;
-		}		
-		return alg;
-	}
+        return signer;
+    }
 
-	public byte[] sign(byte[] content) {
-		if(content == null || content.length == 0){
-			throw new IllegalArgumentException("Conteúdo nulo");
-		}
-		L.info("Bytes para assinar: " + content.length + " bytes");
+    private SignerAlgorithmEnum getAlgoritmo() {
+        SignerAlgorithmEnum alg = SignerAlgorithmEnum.SHA512withRSA;
+        L.info("O algoritmo default é SHA512withRSA");
+        if (System.getProperty("java.version").contains("1.8")
+            && (this.signer.getProvider() != null &&
+                this.signer.getProvider().getName().contains("TokenOuSmartCard_30"))) {
+            L.info("Detectado token WatchData e Java 8; configurando o algoritmo para Sha256withRSA.");
+            alg = SignerAlgorithmEnum.SHA256withRSA;
+        }
+        if (Configuration.getInstance().getSO().toLowerCase().indexOf("indows") > 0) {
+            L.info("Detectado Windows; configurando o algoritmo para Sha256withRSA.");
+            alg = SignerAlgorithmEnum.SHA256withRSA;
+        }
+        return alg;
+    }
 
-		try {
-			KeyStore keyStore = getTokenKeyStore();
-			configSigner(keyStore);
+    public byte[] sign(byte[] content) {
+        if (content == null || content.length == 0) {
+            throw new IllegalArgumentException("Conteúdo nulo");
+        }
+        L.info("Bytes para assinar: " + content.length + " bytes");
 
-			L.info("Tudo pronto. Assinando ... ");
-			//Gera a assinatura avulsa, com o BouncyCastle:
-			byte[] assinatura = this.signer.doDetachedSign(content);
+        try {
+            KeyStore keyStore = getTokenKeyStore();
+            configSigner(keyStore);
 
-			L.info("Assinatura pronta. Tamanho: " + assinatura.length + " bytes");
+            L.info("Tudo pronto. Assinando ... ");
+            // Gera a assinatura avulsa, com o BouncyCastle:
+            byte[] assinatura = this.signer.doDetachedSign(content);
 
-			validar(content, assinatura);
+            L.info("Assinatura pronta. Tamanho: " + assinatura.length + " bytes");
 
-			return assinatura;
-		} 
-		catch (Throwable t) {
-			L.info("Algo falhou: " + t.getMessage() + (t.getCause()!=null?
-					" Causa: "+t.getCause().getMessage():". sem causa."));
-			t.printStackTrace();
-			return null;
-		}
-	}
+            validar(content, assinatura);
 
-	public byte[] signHash(byte[] hash) {
-		if(hash == null || hash.length == 0){
-			throw new IllegalArgumentException("Hash nulo");
-		}
-		L.info("Bytes para assinar: " + hash.length + " bytes");
-		try {
-			KeyStore keyStore = getTokenKeyStore();
-			configSigner(keyStore);
+            return assinatura;
+        } catch (Throwable t) {
+            L.info("Algo falhou: " + t.getMessage() + (t.getCause() != null ? " Causa: " + t.getCause().getMessage() : ". sem causa."));
+            t.printStackTrace();
+            return null;
+        }
+    }
 
-			L.info("Tudo pronto. Assinando ... ");
-			//Gera a assinatura avulsa, com o BouncyCastle:
-			byte[] assinatura = this.signer.doHashSign(hash);
+    public byte[] signHash(byte[] hash) {
+        if (hash == null || hash.length == 0) {
+            throw new IllegalArgumentException("Hash nulo");
+        }
+        L.info("Bytes para assinar: " + hash.length + " bytes");
+        try {
+            KeyStore keyStore = getTokenKeyStore();
+            configSigner(keyStore);
 
-			L.info("Assinatura pronta. Tamanho: " + assinatura.length + " bytes");//2914 bytes
+            L.info("Tudo pronto. Assinando ... ");
+            // Gera a assinatura avulsa, com o BouncyCastle:
+            byte[] assinatura = this.signer.doHashSign(hash);
 
-			return assinatura;
-		} 
-		catch (Throwable t) {
-			L.info("Algo falhou: " + t.getMessage() + (t.getCause()!=null?
-					" Causa: "+t.getCause().getMessage():". sem causa."));
-			t.printStackTrace();
-			return null;
-		}
-	}
+            L.info("Assinatura pronta. Tamanho: " + assinatura.length + " bytes");// 2914 bytes
 
-	/**
-	 * Solicita o PIN do usuário e recupera a KeyStore do token.
-	 * @return
-	 * @throws IOException
-	 */
-	protected KeyStore getTokenKeyStore() throws IOException{
+            return assinatura;
+        } catch (Throwable t) {
+            L.info("Algo falhou: " + t.getMessage() + (t.getCause() != null ? " Causa: " + t.getCause().getMessage() : ". sem causa."));
+            t.printStackTrace();
+            return null;
+        }
+    }
 
-		L.info("Fabricando KeyStoreLoader");
+    /**
+     * Solicita o PIN do usuário e recupera a KeyStore do token.
+     *
+     * @return
+     * @throws IOException
+     */
+    protected KeyStore getTokenKeyStore() throws IOException {
 
-		KeyStoreLoader loader = KeyStoreLoaderFactory.factoryKeyStoreLoader();
+        L.info("Fabricando KeyStoreLoader");
 
-		L.info("Definindo callback do PIN");
+        KeyStoreLoader loader = KeyStoreLoaderFactory.factoryKeyStoreLoader();
 
-		loader.setCallbackHandler(this.callbackHandler);
+        L.info("Definindo callback do PIN");
 
-		L.info("Carregando KeyStore");
+        loader.setCallbackHandler(this.callbackHandler);
 
-		KeyStore keyStore = loader.getKeyStore();//Arqui a JVM solicta entrada do PIN do usuário
+        L.info("Carregando KeyStore");
 
-		String providerName = keyStore.getProvider().toString();
-		String tokenConfigName = providerName.split(" ")[0].split("-")[1];
-		String pathDriver = Configuration.getInstance().getDrivers().get(tokenConfigName);
+        KeyStore keyStore = loader.getKeyStore();// Arqui a JVM solicta entrada do PIN do usuário
 
-		L.info("Provider " + providerName + " @ " + pathDriver);
+        String providerName = keyStore.getProvider().toString();
+        String tokenConfigName = providerName.split(" ")[0].split("-")[1];
+        String pathDriver = Configuration.getInstance().getDrivers().get(tokenConfigName);
 
-		return keyStore;
-	}
+        L.info("Provider " + providerName + " @ " + pathDriver);
 
-	/**
-	 * Configura o PKCS7Signer do Demoiselle para usar o KeyStore recebido.
-	 * @param keyStore
-	 * @return
-	 * @throws GeneralSecurityException
-	 */
-	protected void configSigner(KeyStore keyStore) throws GeneralSecurityException{
+        return keyStore;
+    }
 
-		String alias = keyStore.aliases().nextElement();
+    /**
+     * Configura o PKCS7Signer do Demoiselle para usar o KeyStore recebido.
+     *
+     * @param keyStore
+     * @return
+     * @throws GeneralSecurityException
+     */
+    protected void configSigner(KeyStore keyStore) throws GeneralSecurityException {
 
-		L.info("Alias: " + alias);
+        String alias = keyStore.aliases().nextElement();
 
-		L.info("Pegando o certificado do alias " + alias);
-		this.certificate = (X509Certificate)keyStore.getCertificate(alias);
+        L.info("Alias: " + alias);
 
-		L.info("Pegando a referencia é chave privada ");
-		PrivateKey privateKey = (PrivateKey)keyStore.getKey(alias, null);
-		this.signer.setPrivateKey(privateKey);
+        L.info("Pegando o certificado do alias " + alias);
+        this.certificate = (X509Certificate) keyStore.getCertificate(alias);
 
-		L.info("Buscando a cadeia de autoridades do certificado ");
-		this.chain = CAManager.getInstance().getCertificateChainArray(certificate);
-		this.signer.setCertificates(this.chain);
+        L.info("Pegando a referencia é chave privada ");
+        PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, null);
+        this.signer.setPrivateKey(privateKey);
 
-		this.signer.setProvider(keyStore.getProvider());
-		this.signer.setAlgorithm(getAlgoritmo());
+        L.info("Buscando a cadeia de autoridades do certificado ");
+        this.chain = CAManager.getInstance().getCertificateChainArray(this.certificate);
+        this.signer.setCertificates(this.chain);
 
-	}
+        this.signer.setProvider(keyStore.getProvider());
+        this.signer.setAlgorithm(getAlgoritmo());
 
-	/**
-	 * Valida a assinatura, comparando com o conteúdo original.
-	 * @param content
-	 * @param assinatura
-	 */
-	public void validar(byte[] content, byte[] assinatura){
-		L.info("Validando a assinatura");
-		List<SignatureInformations> sigData = new CAdESChecker().checkDetattachedSignature(content, assinatura);
+    }
 
-		L.info("A assinatura está válida.");
-		for(SignatureInformations si : sigData){
-			L.debug(si.getSignDateGMT());
-			L.debug(si.getSignerBasicCertificate().toString());
-			L.debug(si.getChain().toString());
-		}
-	}		
+    /**
+     * Valida a assinatura, comparando com o conteúdo original.
+     *
+     * @param content
+     * @param assinatura
+     */
+    public void validar(byte[] content, byte[] assinatura) {
+        L.info("Validando a assinatura");
+        List<SignatureInformations> sigData = new CAdESChecker().checkDetachedSignature(content, assinatura);
 
-	public void validarPorHash(byte[] hash, byte[] assinatura, SignerAlgorithmEnum OIDAlgoritmo){
-		L.info("Validando a assinatura");
-		List<SignatureInformations> sigData = new CAdESChecker().checkSignatureByHash(
-				OIDAlgoritmo.getOIDAlgorithmHash(), hash, assinatura);
-		
-		L.info("A assinatura está válida.");
-		for(SignatureInformations si : sigData){
-			L.debug(si.getSignDateGMT());
-			L.debug(si.getSignerBasicCertificate().toString());
-			L.debug(si.getChain().toString());
-		}
-	}		
+        L.info("A assinatura está válida.");
+        for (SignatureInformations si : sigData) {
+            L.debug(si.getSignDateGMT());
+            L.debug(si.getSignerBasicCertificate().toString());
+            L.debug(si.getChain().toString());
+        }
+    }
 
-	public Certificate[] getChain() {
-		return chain;
-	}
+    public void validarPorHash(byte[] hash, byte[] assinatura, SignerAlgorithmEnum OIDAlgoritmo) {
+        L.info("Validando a assinatura");
+        List<SignatureInformations> sigData = new CAdESChecker().checkSignatureByHash(
+            OIDAlgoritmo.getOIDAlgorithmHash(), hash, assinatura);
 
-	public X509Certificate getCertificate() {
-		return certificate;
-	}
+        L.info("A assinatura está válida.");
+        for (SignatureInformations si : sigData) {
+            L.debug(si.getSignDateGMT());
+            L.debug(si.getSignerBasicCertificate().toString());
+            L.debug(si.getChain().toString());
+        }
+    }
+
+    public Certificate[] getChain() {
+        return this.chain;
+    }
+
+    public X509Certificate getCertificate() {
+        return this.certificate;
+    }
 
 }
