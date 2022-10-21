@@ -56,8 +56,8 @@ public class AssinadorPdfTest {
 
     public static void main(String[] args) throws Exception {
         try {
-            File in = new File("./src/test/resources/ofpg.pdf");
-            File out = new File("./src/test/resources/ofpg-signed-stamp.pdf");
+            File in = new File("./src/test/resources/sheet.pdf");
+            File out = new File("./src/test/resources/sheet-signed-stamp.pdf");
 
             Calendar data = Calendar.getInstance();
             data.setTime(FORMATO_DATA_ASSINATURA.parse("08-11-2022 19:10"));
@@ -81,10 +81,10 @@ public class AssinadorPdfTest {
         // byte[] preparado = assinadorPdf.getConteudo();
 
         byte[] assinatura = new AssinadorPdfToken().signHash(hash);// frontend assina o hash
-        System.out.println(Base64.toBase64String(assinatura));
         if (assinatura == null) {
             return;
         }
+        System.out.println(Base64.toBase64String(assinatura));
 
         // new AssinadorPdfToken().validarHash(hash, assinatura, "2.16.840.1.101.3.4.2.3");
         // new AssinadorPdfToken().validarHash(hash, assinatura, "2.16.840.1.101.3.4.2.1");

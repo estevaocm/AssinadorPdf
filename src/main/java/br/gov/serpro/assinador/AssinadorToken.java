@@ -184,7 +184,7 @@ public class AssinadorToken {
 
             return assinatura;
         } catch (Throwable t) {
-            L.info("Algo falhou: " + t.getMessage() + (t.getCause() != null ? " Causa: " + t.getCause().getMessage() : ". sem causa."));
+            L.info("Algo falhou: " + t.getMessage() + (t.getCause() != null ? " Causa: " + t.getCause().getMessage() : ". Sem causa."));
             t.printStackTrace();
             return null;
         }
@@ -201,20 +201,36 @@ public class AssinadorToken {
         L.info("Fabricando KeyStoreLoader");
 
         KeyStoreLoader loader = KeyStoreLoaderFactory.factoryKeyStoreLoader();
+        // new DriverKeyStoreLoader()
+        // new MSKeyStoreLoader()
 
         L.info("Definindo callback do PIN");
 
         loader.setCallbackHandler(this.callbackHandler);
 
-        L.info("Carregando KeyStore");
+        Configuration config = Configuration.getInstance();
+        L.info(config.getDrivers().toString());
+        // {TokenOuSmartCard_05_safenet_eTokenAladdin=C:/WINDOWS/system32/eTPkcs11.dll,
+        // TokenOuSmartCard_07_datakey_TokeniKey2032=C:/WINDOWS/system32/dkck201.dll,
+        // TokenOuSmartCard_17_watchdata_ccid=C:/WINDOWS/System32/WDICP_P11_CCID_v34.dll,
+        // TokenOuSmartCard_18_watchdata_ccid_64=C:/WINDOWS/SysWOW64/WDICP_P11_CCID_v34.dll}
 
+        L.info("Carregando KeyStore");
         KeyStore keyStore = loader.getKeyStore();// Arqui a JVM solicta entrada do PIN do usuário
 
         String providerName = keyStore.getProvider().toString();
-        String tokenConfigName = providerName.split(" ")[0].split("-")[1];
-        String pathDriver = Configuration.getInstance().getDrivers().get(tokenConfigName);
+        L.info(providerName);// SunMSCAPI version 11
+        // String tokenConfigName = providerName.split(" ")[0].split("-")[1];
+        // String pathDriver = config.getDrivers().get(tokenConfigName);
+        String pathDriver = config.getDrivers().get(providerName);
 
         L.info("Provider " + providerName + " @ " + pathDriver);
+
+        /*
+        CertificateLoader certificateLoader = new CertificateLoaderImpl();
+        certificateLoader.setKeyStore(keyStore);
+        X509Certificate certificate = certificateLoader.loadFromToken();
+        */
 
         return keyStore;
     }
