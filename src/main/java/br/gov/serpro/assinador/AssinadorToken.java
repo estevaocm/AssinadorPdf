@@ -38,6 +38,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.security.auth.callback.Callback;
@@ -160,6 +161,7 @@ public class AssinadorToken {
             validar(content, assinatura);
 
             return assinatura;
+
         } catch (Throwable t) {
             L.info("Algo falhou: " + t.getMessage() + (t.getCause() != null ? " Causa: " + t.getCause().getMessage() : ". sem causa."));
             t.printStackTrace();
@@ -183,6 +185,7 @@ public class AssinadorToken {
             L.info("Assinatura pronta. Tamanho: " + assinatura.length + " bytes");// 2914 bytes
 
             return assinatura;
+
         } catch (Throwable t) {
             L.info("Algo falhou: " + t.getMessage() + (t.getCause() != null ? " Causa: " + t.getCause().getMessage() : ". Sem causa."));
             t.printStackTrace();
@@ -198,39 +201,30 @@ public class AssinadorToken {
      */
     protected KeyStore getTokenKeyStore() throws IOException {
 
-        L.info("Fabricando KeyStoreLoader");
-
         KeyStoreLoader loader = KeyStoreLoaderFactory.factoryKeyStoreLoader();
-        // new DriverKeyStoreLoader()
-        // new MSKeyStoreLoader()
+        // Driver carregado [TokenOuSmartCard_05_safenet_eTokenAladdin]
+        // Driver carregado [TokenOuSmartCard_07_datakey_TokeniKey2032]
 
-        L.info("Definindo callback do PIN");
-
-        loader.setCallbackHandler(this.callbackHandler);
+        L.info(loader.getClass().getName());
+        // org.demoiselle.signer.core.keystore.loader.implementation.MSKeyStoreLoader
 
         Configuration config = Configuration.getInstance();
         L.info(config.getDrivers().toString());
         // {TokenOuSmartCard_05_safenet_eTokenAladdin=C:/WINDOWS/system32/eTPkcs11.dll,
         // TokenOuSmartCard_07_datakey_TokeniKey2032=C:/WINDOWS/system32/dkck201.dll,
-        // TokenOuSmartCard_17_watchdata_ccid=C:/WINDOWS/System32/WDICP_P11_CCID_v34.dll,
-        // TokenOuSmartCard_18_watchdata_ccid_64=C:/WINDOWS/SysWOW64/WDICP_P11_CCID_v34.dll}
+        // eTPkcs11.dll=C:/WINDOWS/system32/eTPkcs11.dll}
 
-        L.info("Carregando KeyStore");
-        KeyStore keyStore = loader.getKeyStore();// Arqui a JVM solicta entrada do PIN do usuário
+        loader.setCallbackHandler(this.callbackHandler);
+
+        L.info("Carregando KeyStore...");
+        KeyStore keyStore = loader.getKeyStore();// Aqui a JVM solicta entrada do PIN do usuário?
 
         String providerName = keyStore.getProvider().toString();
         L.info(providerName);// SunMSCAPI version 11
         // String tokenConfigName = providerName.split(" ")[0].split("-")[1];
         // String pathDriver = config.getDrivers().get(tokenConfigName);
-        String pathDriver = config.getDrivers().get(providerName);
-
-        L.info("Provider " + providerName + " @ " + pathDriver);
-
-        /*
-        CertificateLoader certificateLoader = new CertificateLoaderImpl();
-        certificateLoader.setKeyStore(keyStore);
-        X509Certificate certificate = certificateLoader.loadFromToken();
-        */
+        // String pathDriver = config.getDrivers().get(providerName);
+        // L.info("Provider " + providerName + " @ " + pathDriver);
 
         return keyStore;
     }
@@ -244,14 +238,33 @@ public class AssinadorToken {
      */
     protected void configSigner(KeyStore keyStore) throws GeneralSecurityException {
 
-        String alias = keyStore.aliases().nextElement();
+        Enumeration<String> e = keyStore.aliases();
+        String alias = null;
+        String issuer = "";
+        while (e.hasMoreElements() && issuer.indexOf("O=ICP-Brasil, C=BR") < 0) {
+            alias = e.nextElement();
+            L.info("Pegando o certificado do alias " + alias);
+            this.certificate = (X509Certificate) keyStore.getCertificate(alias);
+            issuer = this.certificate.getIssuerX500Principal().getName("RFC1779");
+            // CN=Autoridade Certificadora do SERPRO Final v5, OU=Servico Federal de Processamento de Dados - SERPRO, O=ICP-Brasil, C=BR
+            L.info(issuer);
+            /*
+            410b3e84b02ec844
+            Adobe Content Certificate 10-6
+            APNS certificate
+            Adobe Content Certificate 10-5
+            Microsoft Your Phone (1)
+            Adobe Intermediate CA 10-4
+            Estevao
+            Microsoft Your Phone
+            Adobe Intermediate CA 10-3
+            ESTEVAO CHAVES MONTEIRO
+             */
+        }
 
-        L.info("Alias: " + alias);
+        L.info("Alias selecionado: " + alias);
 
-        L.info("Pegando o certificado do alias " + alias);
-        this.certificate = (X509Certificate) keyStore.getCertificate(alias);
-
-        L.info("Pegando a referencia é chave privada ");
+        L.info("Pegando a referencia à chave privada ");
         PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, null);
         this.signer.setPrivateKey(privateKey);
 
