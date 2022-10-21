@@ -26,8 +26,8 @@
  * para mais detalhes.
  *
  * Você deve ter recebido uma cópia da GNU LGPL versão 3, sob o título
- * "LICENCA.txt", junto com esse programa. Caso contrário, acesse 
- * <http://www.gnu.org/licenses/> ou escreva para a Fundação do Software Livre (FSF) 
+ * "LICENCA.txt", junto com esse programa. Caso contrário, acesse
+ * <http://www.gnu.org/licenses/> ou escreva para a Fundação do Software Livre (FSF)
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02111-1301, USA.
  */
 package br.gov.serpro.pdf.assinador;
@@ -46,66 +46,68 @@ import br.gov.serpro.assinador.pdf.AssinadorPdfToken;
 import br.gov.serpro.pdf.assinador.util.EstampaUtil;
 
 /**
- * 
+ *
  * @author Estêvão Monteiro
  * @since 23/10/17
  */
 public class AssinadorPdfTest {
 
-	private static final SimpleDateFormat FORMATO_DATA_ASSINATURA = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-	
-	public static void main(String[] args) throws Exception{
-		try{
-			File in = new File("./src/test/resources/ofpg.pdf");
-			File out = new File("./src/test/resources/ofpg-signed-stamp.pdf");
-			
-			Calendar data = Calendar.getInstance();
-			data.setTime(FORMATO_DATA_ASSINATURA.parse("08-11-2018 19:10"));
-			
-			AssinadorPdf assinadorPdf = new AssinadorPdf(in, out, data);
-			//assinadorPdf.sign();
-			testarAssinaturaAssincrona(assinadorPdf);
-			
-		}
-		catch(Throwable t){
-			t.printStackTrace();
-		}
-	}
-	
-	private static void testarAssinaturaAssincrona(AssinadorPdf assinadorPdf) throws Throwable{
-		File imagem = recuperarImagem();
-		imagem = gerarImagem();
-		
-		int pagina = assinadorPdf.getPDDocument().getNumberOfPages();
-		assinadorPdf.prepararEstampa(new FileInputStream(imagem), pagina, 30, 690, -50);
-		byte[] hash = assinadorPdf.hash("SHA-512");//backend calcula o hash
-		//byte[] preparado = assinadorPdf.getConteudo();
-		
-		byte[] assinatura = new AssinadorPdfToken().signHash(hash);//frontend assina o hash
-		System.out.println(Base64.toBase64String(assinatura));
-		if(assinatura == null) return;
-		
-		//new AssinadorPdfToken().validarHash(hash, assinatura, "2.16.840.1.101.3.4.2.3");
-		//new AssinadorPdfToken().validarHash(hash, assinatura, "2.16.840.1.101.3.4.2.1");
-		
-		new AssinadorPdfToken().validarPorHash(hash, assinatura, SignerAlgorithmEnum.SHA512withRSA);
-		
-		assinadorPdf.sign(assinatura);//backend assina o PDF com assinatura recebida do frontend
-		
-		assinadorPdf.close();
-	}	
+    private static final SimpleDateFormat FORMATO_DATA_ASSINATURA = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 
-	private static File gerarImagem() throws IOException {
-		return EstampaUtil.gerarEstampa(
-				"Organização",
-				"Fulano Cicrano Beltrano Fulano Cicrano", 
-				"012.345.678-90", 
-				"COORDENADOR DE LICITACOES DE SERVIÇOS ADM. E AQUISICOES DE BENS E CONTRATOS", 
-				"08/01/2018 17:15", "http://assinador.org.br/validacao");
-	}
-	
-	private static File recuperarImagem() {
-		return new File("~/assinador/estampa4450810727878248742.png");
-	}
-	
+    public static void main(String[] args) throws Exception {
+        try {
+            File in = new File("./src/test/resources/ofpg.pdf");
+            File out = new File("./src/test/resources/ofpg-signed-stamp.pdf");
+
+            Calendar data = Calendar.getInstance();
+            data.setTime(FORMATO_DATA_ASSINATURA.parse("08-11-2022 19:10"));
+
+            AssinadorPdf assinadorPdf = new AssinadorPdf(in, out, data);
+            // assinadorPdf.sign();
+            testarAssinaturaAssincrona(assinadorPdf);
+
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
+    private static void testarAssinaturaAssincrona(AssinadorPdf assinadorPdf) throws Throwable {
+        File imagem = recuperarImagem();
+        imagem = gerarImagem();
+
+        int pagina = assinadorPdf.getPDDocument().getNumberOfPages();
+        assinadorPdf.prepararEstampa(new FileInputStream(imagem), pagina, 30, 690, -50);
+        byte[] hash = assinadorPdf.hash("SHA-512");// backend calcula o hash
+        // byte[] preparado = assinadorPdf.getConteudo();
+
+        byte[] assinatura = new AssinadorPdfToken().signHash(hash);// frontend assina o hash
+        System.out.println(Base64.toBase64String(assinatura));
+        if (assinatura == null) {
+            return;
+        }
+
+        // new AssinadorPdfToken().validarHash(hash, assinatura, "2.16.840.1.101.3.4.2.3");
+        // new AssinadorPdfToken().validarHash(hash, assinatura, "2.16.840.1.101.3.4.2.1");
+
+        new AssinadorPdfToken().validarPorHash(hash, assinatura, SignerAlgorithmEnum.SHA512withRSA);
+
+        assinadorPdf.sign(assinatura);// backend assina o PDF com assinatura recebida do frontend
+
+        assinadorPdf.close();
+    }
+
+    private static File gerarImagem() throws IOException {
+        return EstampaUtil.gerarEstampa(
+            "Organização",
+            "Fulano Cicrano Beltrano Fulano Cicrano",
+            "012.345.678-90",
+            "COORDENADOR DE LICITACOES DE SERVIÇOS ADM. E AQUISICOES DE BENS E CONTRATOS",
+            "08/01/2018 17:15",
+            "http://assinador.org.br/validacao");
+    }
+
+    private static File recuperarImagem() {
+        return new File("~/assinador/estampa4450810727878248742.png");
+    }
+
 }
